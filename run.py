@@ -17,7 +17,7 @@ SHEET = GSPREAD_CLIENT.open("love_sandwiches")
 def get_sales_data():
     """
     Get sales figures input from the user.
-    Run a  while loop to collect a valud string of data from the user
+    Run a while loop to collect a valid string of data from the user
     via the terminal, which must be a string of 6 numbers separated
     by commas. The loop will repeatedly request data, until it is valid.
     """
@@ -58,11 +58,13 @@ def validate_data(values):
 
 def update_worksheet(data, worksheet):
     """
-    receives a list of integers to be inserted into a worksheet
-    Update the relevant worksheet with the data provided
+    Receives a list of integers to be inserted into a worksheet
+    Update the relevant worksheet with the list data provided
     """
     print(f"Updating {worksheet} worksheet...\n")
     worksheet_to_update = SHEET.worksheet(worksheet)
+
+    # adds new row to the end of the current data
     worksheet_to_update.append_row(data)
     print(f"{worksheet} worksheet updated successfully\n")
 
@@ -89,9 +91,9 @@ def calculate_surplus_data(sales_row):
 
 def get_last_5_entries_sales():
     """
-    Collects columns of data from sales worksheet, collecting
-    the last 5 entries for each sandwich and returns the data
-    as a list of lists.
+    Collect columns of data from sales worksheet.
+    Get the last 5 entries for each sandwich and
+    return the data as a list of lists.
     """
     sales = SHEET.worksheet("sales")
 
@@ -112,7 +114,8 @@ def calculate_stock_data(data):
 
     for column in data:
         int_column = [int(num) for num in column]
-        average = sum(int_column) / len(int_column)  # or sum(int_column) / 5
+        average = sum(int_column) / len(int_column)
+        # or average = sum(int_column) / 5
         stock_num = average * 1.1
         new_stock_data.append(round(stock_num))
 
@@ -126,13 +129,34 @@ def main():
     data = get_sales_data()
     sales_data = [int(num) for num in data]
     update_worksheet(sales_data, "sales")
+
     new_surplus_data = calculate_surplus_data(sales_data)
     update_worksheet(new_surplus_data, "surplus")
+
     sales_columns = get_last_5_entries_sales()
     stock_data = calculate_stock_data(sales_columns)
     update_worksheet(stock_data, "stock")
+    return stock_data
 
 
 print("Welcome to Love Sandwiches Data Automation")
-main()
+stock_data = main()
 
+
+# Solution to Love Sandwiches data automation challenge
+def get_stock_values(data):
+    """
+    Creates a dictionary of data.
+    Prints it to the terminal for the user.
+    """
+    headings = SHEET.worksheet("stock").row_values(1)
+
+    print("Make the following numbers of sandwiches for next market:\n")
+
+    stock_dict = {heading: data for heading, data in zip(headings, data)}
+
+    return stock_dict
+
+
+stock_values = get_stock_values(stock_data)
+print(stock_values)
